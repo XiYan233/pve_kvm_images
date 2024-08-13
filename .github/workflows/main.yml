@@ -59,7 +59,7 @@ jobs:
                     existing_asset_id=$(curl -s -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/XiYan233/pve_kvm_images/releases/$release_id/assets" | jq -r --arg name "$(basename "$file")" '.[] | select(.name == $name) | .id')
                     if [ -n "$existing_asset_id" ]; then
                         echo "\nAsset $file already exists in release, deleting existing asset..."
-                        delete_response=$(curl -s -X DELETE -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/XiYan233/pve_kvm_images/releases/assets/$existing_asset_id")
+                        #delete_response=$(curl -s -X DELETE -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/XiYan233/pve_kvm_images/releases/assets/$existing_asset_id")
                         echo "\n$delete_response"
                         if [ $? -eq 0 ] && ! echo "$delete_response" | grep -q "error"; then
                             echo "\nExisting asset deleted successfully."
