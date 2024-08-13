@@ -27,6 +27,7 @@ jobs:
         sudo apt-get install -y curl wget unzip zip jq
         sudo apt-get install -y libguestfs-tools rng-tools curl
         sudo apt-get install -y libguestfs-tools rng-tools curl --fix-missing
+        sudo apt-get install -y qemu-utils proxmox-backup-file
         curl -o rebuild_qcow2.sh https://raw.githubusercontent.com/XiYan233/pve_kvm_images/main/rebuild_qcow2.sh
         chmod 777 rebuild_qcow2.sh
 
@@ -54,31 +55,44 @@ jobs:
             for file in "${images[@]}"; do
                 echo "Building and uploading images"
                 ./rebuild_qcow2.sh $file
-                if [ -f "$file" ] && [ $(stat -c %s "$file") -gt 10485760 ] && [ $(stat -c %s "$file") -le 2147483648 ]; then
-                    echo "\nChecking if $file already exists in release..."
-                    existing_asset_id=$(curl -s -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/XiYan233/pve_kvm_images/releases/$release_id/assets" | jq -r --arg name "$(basename "$file")" '.[] | select(.name == $name) | .id')
+                # 将 qcow2 转换为 raw
+                raw_image="${file%.qcow2}.raw"
+                echo "Converting $file to $raw_image"
+                qemu-img convert -f qcow2 -O raw "$file" "$raw_image"
+    
+                # 将 raw 转换为 vma.zst
+                vma_image="${file%.qcow2}.vma.zst"
+                echo "Converting $raw_image to $vma_image"
+                vma create -v -c -z1 "$vma_image" "$raw_image"
+    
+                # 删除 raw 文件以节省空间
+                rm -f "$raw_image"
+                # 检查文件大小并上传 vma.zst 文件
+                if [ -f "$vma_image" ] && [ $(stat -c %s "$vma_image") -gt 10485760 ] && [ $(stat -c %s "$vma_image") -le 2147483648 ]; then
+                    echo "\nChecking if $vma_image already exists in release..."
+                    existing_asset_id=$(curl -s -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/XiYan233/pve_kvm_images/releases/$release_id/assets" | jq -r --arg name "$(basename "$vma_image")" '.[] | select(.name == $name) | .id')
                     if [ -n "$existing_asset_id" ]; then
-                        echo "\nAsset $file already exists in release, deleting existing asset..."
+                        echo "\nAsset $vma_image already exists in release, deleting existing asset..."
                         delete_response=$(curl -s -X DELETE -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/XiYan233/pve_kvm_images/releases/assets/$existing_asset_id")
                         echo "\n$delete_response"
                         if [ $? -eq 0 ] && ! echo "$delete_response" | grep -q "error"; then
                             echo "\nExisting asset deleted successfully."
                         else
                             echo "\nFailed to delete existing asset. Skipping file upload..."
-                            rm -rf $file
+                            rm -rf $vma_image
                             continue
                         fi
                     else
-                        echo "No $file file."
+                        echo "No $vma_image file."
                     fi
-                    echo "\nUploading $file to release..."
+                    echo "\nUploading $vma_image to release..."
                     curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
                       -H "Content-Type: application/zip" \
-                      -T "$file" \
-                      "https://uploads.github.com/repos/XiYan233/pve_kvm_images/releases/$release_id/assets?name=$(basename "$file")"
-                    rm -rf $file
+                      -T "$vma_image" \
+                      "https://uploads.github.com/repos/XiYan233/pve_kvm_images/releases/$release_id/assets?name=$(basename "$vma_image")"
+                    rm -rf $vma_image
                 else
-                    echo "\nNo $file or less than 10 MB"
+                    echo "\nNo $vma_image or less than 10 MB"
                 fi
             done
         else
