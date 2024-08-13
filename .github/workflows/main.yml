@@ -16,8 +16,8 @@ jobs:
 
     - name: Configure Git
       run: |
-        git config --global user.name "daily-update"
-        git config --global user.email "tg@spiritlhl.top"
+        git config --global user.name "XiYan"
+        git config --global user.email "i@xiyan.it"
 
     - name: Environment preparation
       run: |
@@ -27,7 +27,7 @@ jobs:
         sudo apt-get install -y curl wget unzip zip jq
         sudo apt-get install -y libguestfs-tools rng-tools curl
         sudo apt-get install -y libguestfs-tools rng-tools curl --fix-missing
-        curl -o rebuild_qcow2.sh https://raw.githubusercontent.com/oneclickvirt/pve_kvm_images/main/rebuild_qcow2.sh
+        curl -o rebuild_qcow2.sh https://raw.githubusercontent.com/XiYan233/pve_kvm_images/main/rebuild_qcow2.sh
         chmod 777 rebuild_qcow2.sh
 
     - name: Download qcow2
@@ -75,7 +75,7 @@ jobs:
                     curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
                       -H "Content-Type: application/zip" \
                       -T "$file" \
-                      "https://uploads.github.com/repos/oneclickvirt/pve_kvm_images/releases/$release_id/assets?name=$(basename "$file")"
+                      "https://uploads.github.com/repos/XiYan233/pve_kvm_images/releases/$release_id/assets?name=$(basename "$file")"
                     rm -rf $file
                 else
                     echo "\nNo $file or less than 10 MB"
