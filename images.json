@@ -1,0 +1,107 @@
+[
+  {
+    "name": "Ubuntu",
+    "templates": [
+      {
+        "name": "Ubuntu 18",
+        "vmid": 1000,
+        "link": "https://github.com/XiYan233/pve_kvm_images/releases/download/latest/ubuntu18.qcow2"
+      },
+      {
+        "name": "Ubuntu 20",
+        "vmid": 1001,
+        "link": "https://github.com/XiYan233/pve_kvm_images/releases/download/latest/ubuntu20.qcow2"
+      },
+      {
+        "name": "Ubuntu 22",
+        "vmid": 1002,
+        "link": "https://github.com/XiYan233/pve_kvm_images/releases/download/latest/ubuntu22.qcow2"
+      }
+    ]
+  },
+  {
+    "name": "Windows Server",
+    "templates": [
+      {
+        "name": "Windows Server 2019",
+        "vmid": 2000,
+        "link": "https://images.cdn.convoypanel.com/windows/windows-2019-datacenter-amd64.vma.zst"
+      },
+      {
+        "name": "Windows Server 2022",
+        "vmid": 2001,
+        "link": "https://images.cdn.convoypanel.com/windows/windows-2022-datacenter-amd64.vma.zst"
+      }
+    ]
+  },
+  {
+    "name": "CentOS",
+    "templates": [
+      {
+        "name": "CentOS 9",
+        "vmid": 3001,
+        "link": "https://github.com/XiYan233/pve_kvm_images/releases/download/latest/centos9-stream.qcow2"
+      }
+    ]
+  },
+  {
+    "name": "Debian",
+    "templates": [
+      {
+        "name": "Debian 11",
+        "vmid": 4000,
+        "link": "https://github.com/XiYan233/pve_kvm_images/releases/download/latest/debian11.qcow2"
+      },
+      {
+        "name": "Debian 12",
+        "vmid": 4001,
+        "link": "https://github.com/XiYan233/pve_kvm_images/releases/download/latest/debian12.qcow2"
+      }
+    ]
+  },
+  {
+    "name": "Rocky Linux",
+    "templates": [
+      {
+        "name": "Rocky Linux 8",
+        "vmid": 5000,
+        "link": "https://github.com/XiYan233/pve_kvm_images/releases/download/latest/rockylinux8.qcow2"
+      },
+      {
+        "name": "Rocky Linux 9",
+        "vmid": 5001,
+        "link": "https://github.com/XiYan233/pve_kvm_images/releases/download/latest/rockylinux9.qcow2"
+      }
+    ]
+  },
+  {
+    "name": "Alma Linux",
+    "templates": [
+      {
+        "name": "Alma Linux 8",
+        "vmid": 6000,
+        "link": "https://github.com/XiYan233/pve_kvm_images/releases/download/latest/almalinux8.qcow2"
+      },
+      {
+        "name": "Alma Linux 9",
+        "vmid": 6001,
+        "link": "https://github.com/XiYan233/pve_kvm_images/releases/download/latest/almalinux9.qcow2"
+      }
+    ]
+  },
+  {
+    "name": "Alpine Linux",
+    "templates": [
+      {
+        "name": "Alpine Linux Edge",
+        "vmid": 7000,
+        "link": "https://github.com/XiYan233/pve_kvm_images/releases/download/latest/alpinelinux_edge.qcow2"
+      },
+      {
+        "name": "Alpine Linux Stable",
+        "vmid": 7001,
+        "link": "https://github.com/XiYan233/pve_kvm_images/releases/download/latest/alpinelinux_stable.qcow2"
+      }
+    ]
+  }
+]
