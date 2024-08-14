@@ -28,8 +28,6 @@ jobs:
         sudo apt-get install -y libguestfs-tools rng-tools curl
         sudo apt-get install -y libguestfs-tools rng-tools curl --fix-missing
         sudo apt-get install -y qemu-utils
-        curl -fsSL https://get.docker.com -o get-docker.sh
-        sh get-docker.sh
         curl -o rebuild_qcow2.sh https://raw.githubusercontent.com/XiYan233/pve_kvm_images/main/rebuild_qcow2.sh
         chmod 777 rebuild_qcow2.sh
 
@@ -58,41 +56,33 @@ jobs:
                 echo "Building images"
                 ./rebuild_qcow2.sh $file
             done
-            docker run --rm -v $(pwd):/data -w /data proxmox/vma \
-            bash -c "for qcow2 in *.qcow2; do
-                       raw=\${qcow2%.qcow2}.raw;
-                       vma=\${qcow2%.qcow2}.vma.zst;
-                       qemu-img convert -f qcow2 -O raw \$qcow2 \$raw;
-                       vma create -v -c -z1 \$vma \$raw;
-                       rm -f \$raw;
-                     done"
         else
             echo "NO KVM IMAGES"
         fi
     - name: Upload Images
       run: |
-        vma_images=($(ls *.vma.zst))
-        if [ ${#vma_images[@]} -gt 0 ]; then
+        qcow2_images=($(ls *.qcow2))
+        if [ ${#qcow2_images[@]} -gt 0 ]; then
             release_id=$(curl -s -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/releases/latest" | jq -r '.id')
-            for vma_image in "${vma_images[@]}"; do
-                echo "Uploading $vma_image to release..."
+            for qcow2_image in "${qcow2_images[@]}"; do
+                echo "Uploading $qcow2_image to release..."
                 
                 # Check if the asset already exists
-                existing_asset_id=$(curl -s -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/releases/$release_id/assets" | jq -r --arg name "$(basename "$vma_image")" '.[] | select(.name == $name) | .id')
+                existing_asset_id=$(curl -s -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/releases/$release_id/assets" | jq -r --arg name "$(basename "$qcow2_image")" '.[] | select(.name == $name) | .id')
                 
                 if [ -n "$existing_asset_id" ]; then
-                    echo "Asset $vma_image already exists, deleting..."
+                    echo "Asset $qcow2_image already exists, deleting..."
                     curl -s -X DELETE -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/releases/assets/$existing_asset_id"
                 fi
                 
                 # Upload the new asset
                 curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
                      -H "Content-Type: application/octet-stream" \
-                     --data-binary @"$vma_image" \
-                     "https://uploads.github.com/repos/${{ github.repository }}/releases/$release_id/assets?name=$(basename "$vma_image")"
+                     --data-binary @"$qcow2_image" \
+                     "https://uploads.github.com/repos/${{ github.repository }}/releases/$release_id/assets?name=$(basename "$qcow2_image")"
                 
-                # Clean up the local vma.zst image
-                rm -f "$vma_image"
+                # Clean up the local qcow2 image
+                rm -f "$qcow2_image"
             done
         else
             echo "No vma.zst images found for upload."
