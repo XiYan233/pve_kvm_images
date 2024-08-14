@@ -1,7 +1,7 @@
 name: Build PVE KVM images
 on:
   schedule:
-    - cron: '34 0 * * *'
+    - cron: '30 0 * * *'
   workflow_dispatch:
 
 jobs:
@@ -47,45 +47,41 @@ jobs:
             done
         fi
       
-    - name: Build Images
+    - name: Build Images and Upload Image
       run: |
         images=($(curl -s -m 6 https://down.idc.wiki/Image/realServer-Template/current/qcow2/ | grep -o '<a href="[^"]*">' | awk -F'"' '{print $2}' | sed -n '/qcow2$/s#/Image/realServer-Template/current/qcow2/##p'))
         if [ ${#images[@]} -gt 0 ]; then
-            release_id=$(curl -s -m 6 -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/XiYan233/pve_kvm_images/releases/tags/latest" | jq -r '.id')
+            release_id=$(curl -s -m 6 -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/releases/tags/latest" | jq -r '.id')
             for file in "${images[@]}"; do
                 echo "Building images"
                 ./rebuild_qcow2.sh $file
+                if [ -f "$file" ] && [ $(stat -c %s "$file") -gt 10485760 ] && [ $(stat -c %s "$file") -le 2147483648 ]; then
+                    echo "\nChecking if $file already exists in release..."
+                    existing_asset_id=$(curl -s -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/releases/$release_id/assets" | jq -r --arg name "$(basename "$file")" '.[] | select(.name == $name) | .id')
+                    if [ -n "$existing_asset_id" ]; then
+                        echo "\nAsset $file already exists in release, deleting existing asset..."
+                        delete_response=$(curl -s -X DELETE -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/releases/assets/$existing_asset_id")
+                        echo "\n$delete_response"
+                        if [ $? -eq 0 ] && ! echo "$delete_response" | grep -q "error"; then
+                            echo "\nExisting asset deleted successfully."
+                        else
+                            echo "\nFailed to delete existing asset. Skipping file upload..."
+                            rm -rf $file
+                            continue
+                        fi
+                    else
+                        echo "No $file file."
+                    fi
+                    echo "\nUploading $file to release..."
+                    curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                      -H "Content-Type: application/zip" \
+                      -T "$file" \
+                      "https://uploads.github.com/repos/${{ github.repository }}/releases/$release_id/assets?name=$(basename "$file")"
+                    rm -rf $file
+                else
+                    echo "\nNo $file or less than 10 MB"
+                fi
             done
         else
             echo "NO KVM IMAGES"
         fi
-    - name: Upload Images
-      run: |
-        qcow2_images=($(ls *.qcow2))
-        if [ ${#qcow2_images[@]} -gt 0 ]; then
-            release_id=$(curl -s -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/releases/latest" | jq -r '.id')
-            for qcow2_image in "${qcow2_images[@]}"; do
-                echo "Uploading $qcow2_image to release..."
-                
-                # Check if the asset already exists
-                existing_asset_id=$(curl -s -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/releases/$release_id/assets" | jq -r --arg name "$(basename "$qcow2_image")" '.[] | select(.name == $name) | .id')
-                
-                if [ -n "$existing_asset_id" ]; then
-                    echo "Asset $qcow2_image already exists, deleting..."
-                    curl -s -X DELETE -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/releases/assets/$existing_asset_id"
-                fi
-                
-                # Upload the new asset
-                curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-                     -H "Content-Type: application/octet-stream" \
-                     --data-binary @"$qcow2_image" \
-                     "https://uploads.github.com/repos/${{ github.repository }}/releases/$release_id/assets?name=$(basename "$qcow2_image")"
-                
-                # Clean up the local qcow2 image
-                rm -f "$qcow2_image"
-            done
-        else
-            echo "No vma.zst images found for upload."
-            exit 1
-        fi
-        
