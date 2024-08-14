@@ -16,9 +16,9 @@ jq -c '.[] | .templates[]' images.json | while read template; do
   echo "Downloading $name ($vmid)..."
   curl -L -o "${name}.qcow2" "$link"
 
-  # 创建空虚拟机
+  # 创建空虚拟机并指定名称
   echo "Creating VM $name ($vmid)..."
-  qm create "$vmid" --memory 512 --net0 virtio,bridge=vmbr0
+  qm create "$vmid" --memory 512 --net0 virtio,bridge=vmbr0 --name "$name"
 
   # 导入磁盘到虚拟机
   echo "Importing disk..."
