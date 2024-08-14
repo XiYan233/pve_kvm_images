@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Windows Server",
+    "templates": [
+      {
+        "name": "Windows Server 2019",
+        "vmid": 2000,
+        "link": "https://images.cdn.convoypanel.com/windows/windows-2019-datacenter-amd64.vma.zst"
+      },
+      {
+        "name": "Windows Server 2022",
+        "vmid": 2001,
+        "link": "https://images.cdn.convoypanel.com/windows/windows-2022-datacenter-amd64.vma.zst"
+      }
+    ]
+  }
+]
