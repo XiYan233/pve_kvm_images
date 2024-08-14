@@ -18,7 +18,7 @@ jq -c '.[] | .templates[]' images.json | while read template; do
 
   # 创建空虚拟机
   echo "Creating VM $name ($vmid)..."
-  qm create "$vmid" --memory 2048 --net0 virtio,bridge=vmbr0
+  qm create "$vmid" --memory 512 --net0 virtio,bridge=vmbr0
 
   # 导入磁盘到虚拟机
   echo "Importing disk..."
