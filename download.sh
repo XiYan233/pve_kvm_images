@@ -1,6 +1,6 @@
 #!/bin/bash
 
-STORAGE=$0
+STORAGE=$1
 
 # 下载 JSON 文件
 curl -s https://raw.githubusercontent.com/XiYan233/pve_kvm_images/main/images.json -o images.json
