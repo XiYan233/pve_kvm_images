@@ -24,7 +24,7 @@
     "templates": [
       {
         "name": "CentOS-9",
-        "vmid": 3001,
+        "vmid": 3000,
         "link": "https://github.com/XiYan233/pve_kvm_images/releases/download/latest/centos9-stream.qcow2"
       }
     ]
