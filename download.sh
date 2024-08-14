@@ -30,6 +30,7 @@ jq -c '.[] | .templates[]' images.json | while read template; do
   qm set "$vmid" --boot c --bootdisk scsi0
   qm set "$vmid" --ide2 "$STORAGE":cloudinit
   qm set "$vmid" --serial0 socket --vga serial0
+  qm set "$vmid" --name "$name"
 
   # 将虚拟机转换为模板
   echo "Converting VM $name ($vmid) to template..."
