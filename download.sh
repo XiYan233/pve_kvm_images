@@ -26,9 +26,9 @@ jq -c '.[] | .templates[]' images.json | while read template; do
 
   # 配置虚拟机
   echo "Configuring VM..."
-  qm set "$vmid" --scsihw virtio-scsi-pci --scsi0 "$STORAGE":vm-$vmid-disk-0
+  qm set "$vmid" --sata0 "$STORAGE":vm-$vmid-disk-0
   qm set "$vmid" --boot c --bootdisk scsi0
-  qm set "$vmid" --ide2 "$STORAGE":cloudinit
+  qm set "$vmid" --ide0 "$STORAGE":cloudinit
   qm set "$vmid" --serial0 socket --vga serial0
   qm set "$vmid" --name "$name"
 
