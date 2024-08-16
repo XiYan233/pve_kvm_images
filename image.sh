@@ -50,7 +50,7 @@ download_image_and_create_vm() {
     qm create "$vmid" --name "$template_name" --memory 1024 --net0 virtio,bridge=$vmbr
     qm disk import "$vmid" "$image_file" "$storage"
 
-    qm set "$vmid" --ostype l26 --ciuser="$user" --cipassword="$password" --virtio0 "$storage:vm-$vmid-disk-0" --boot c --bootdisk virtio0 --ide2 "$storage:cloudinit" --scsihw virtio-scsi-pci --serial0 socket --vga serial0
+    qm set "$vmid" --ostype l26 --ciuser="$user" --cipassword="$password" --virtio0 "$storage:vm-$vmid-disk-0" --boot c --bootdisk virtio0 --ide0 "$storage:cloudinit" --scsihw virtio-scsi-pci --serial0 socket --vga serial0
 
     # 转换为模板
     qm template "$vmid"
