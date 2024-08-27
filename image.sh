@@ -48,7 +48,7 @@ download_image_and_create_vm() {
     qm destroy "$vmid" --destroy-unreferenced-disks=1  --purge=1
 
     # 创建虚拟机
-    qm create "$vmid" --name "$template_name" --memory 1024 --net0 virtio,bridge=$vmbr
+    qm create "$vmid" --name "$template_name" --memory 512 --net0 virtio,bridge=$vmbr
     qm disk import "$vmid" "$image_file" "$storage"
 
     qm set "$vmid" --ostype l26 --ciuser="$user" --cipassword="$password" --virtio0 "$storage:vm-$vmid-disk-0" --boot c --bootdisk virtio0 --ide0 "$storage:cloudinit" --scsihw virtio-scsi-pci --serial0 socket --vga serial0
